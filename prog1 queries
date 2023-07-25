@@ -1,0 +1,41 @@
+iv.
+select * 
+from employee 
+where ssn in (
+select e.sup_ssn
+from employee e join works_no p 
+on e.ssn = p.emp_ssn 
+group by e.sup_ssn, p.p_no 
+having count(e.sup_ssn) > 3 and count(p.emp_ssn) > 1);
+
+##
+v.
+select emp_name 
+from dependent 
+where emp_ssn in (
+select w.emp_ssn 
+from works_no w join project p
+on p.p_no = w.p_no
+where p.cost > 100000 );
+##
+VI. 
+select d., e. 
+from department d join employee e 
+on e.d_no = d.d_no
+where d.d_no in (
+select d.d_no 
+from department d join project p 
+on d.d_no = p.d_no 
+group by p.d_no 
+having count(p.location) > 1 );
+
+##
+. 
+select e.f_name, e.l_name, d.d_name 
+FROM employee e join department d 
+on d.d_no = e.d_no 
+where e.ssn in 
+( select p.emp_ssn 
+from works_no p 
+group by p.emp_ssn 
+having count(p.p_no) > 2);
