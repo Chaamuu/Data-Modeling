@@ -1,0 +1,18 @@
+
+
+ORDER BY: It is used to sort the data in a particular order for a specific column in ascending or descending order.
+SELECT COLUMN1, COLUMN2, FROM [TABLE NAME] ORDER BY Column1 desc, Column2 asc;
+SELECT EMP_NAME, EMP_ID FROM EMPLOYEE ORDER BY EMP_NAME desc, EMP_ID asc;
+
+. LIKE: This MySQL Query Command retrieves the data from the table for the specific pattern.
+SELECT COLUMN1, COLUMN2 FROM [TABLE NAME] WHERE COLUMN1 Like'';
+
+SELECT EMP_ID, EMP_NAME, EMP_SALARY FROM EMPLOYEE WHERE EMP_NAME like'SA%';
+
+ BETWEEN: It ranges the data between the two conditions. Syntax:
+SELECT Column1, Column2 FROM EMPLOYEE WHERE Column3 BETWEEN val1 AND val2;
+SELECT EMP_ID, EMP_NAME FROM EMPLOYEE WHERE EMP_SAL BETWEEN 2000 AND 5000;
+
+IS NULL: This is used for checking the value or retrieving the data for the particular null column.
+SELECT Column1, Column2 FROM [TABLE NAME] Column3 IS NULL;
+SELECT EMP_ID, EMP_NAME FROM EMPLOYEE WHERE EMP_SAL IS NULL;
