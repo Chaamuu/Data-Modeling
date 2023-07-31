@@ -16,3 +16,15 @@ SELECT EMP_ID, EMP_NAME FROM EMPLOYEE WHERE EMP_SAL BETWEEN 2000 AND 5000;
 IS NULL: This is used for checking the value or retrieving the data for the particular null column.
 SELECT Column1, Column2 FROM [TABLE NAME] Column3 IS NULL;
 SELECT EMP_ID, EMP_NAME FROM EMPLOYEE WHERE EMP_SAL IS NULL;
+
+ Query for Updating a View:
+CREATE OR REPLACE VIEW [ Product List] AS
+SELECT ProductID, ProductName, Category
+FROM Products
+WHERE Discontinued = No;
+
+Displaying Internal Tables:
+Internal tables are formed as a by-product of a user action and are usually not accessible. The data in internal tables cannot be manipulated; however, the metadata of the internal tables can be viewed using the following query.
+
+	
+SELECT * FROM Sys.Objects WHERE Type='it'
