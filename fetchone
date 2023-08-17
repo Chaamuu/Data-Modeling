@@ -1,0 +1,10 @@
+cursor.execute("SELECT * FROM employees")
+row = cursor.fetchone()
+while row is not None:
+  print(row)
+  row = cursor.fetchone()
+
+# Using the cursor as iterator
+cursor.execute("SELECT * FROM employees")
+for row in cursor:
+  print(row)
