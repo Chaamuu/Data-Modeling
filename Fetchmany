@@ -1,0 +1,10 @@
+# Reading data from student table
+import mysql.connector as mysql
+def main():
+  cn=mysql.connect(database="db5",
+  user="root",password="root")
+  c=cn.cursor()
+  c.execute("select * from student")
+  rows=c.fetchmany(2)
+  print(rows)
+main()
