@@ -1,0 +1,23 @@
+select count(*), v.Name from VENDOR v natural join INSTALL i where i.place='Dom' group by v.Tin_no having count(*) >= ALL(select count(*) from VENDOR v natural join INSTALL i where place='Dom' group by Name);
+
+select distinct(u.H_no), u.Address from INSTALL i natural join USER u where Capacity = (select max(Capacity) from INSTALL);
+
+select distinct(Address) from PANEL natural join INSTALL natural join USER where Type = 'mono';
+
+select sum(Price) from PANEL where PV_module in (select PV_module from INSTALL natural join USER where Address = 'mangalore')  group by Type;
+
+select PV_module, Name from VENDOR natural join INSTALL natural join PANEL where Inst_date = (select min(Inst_date) from INSTALL);
+
+select avg(Price), Type from PANEL natural join INSTALL where Place='Com' group by Type;
+
+
+create table VENDOR(Tin_no int primary key, Name varchar(20), Contact double, Address varchar(20));
+
+create table PANEL(PV_module varchar(10) primary key, Type varchar(10), Price float, Warranty int);
+
+create table USER(H_no int primary key, Name varchar(20), Address varchar(50));
+
+create table INSTALL(Capacity int, Inst_date date, Place varchar(15), H_no int, PV_module varchar(10), Tin_no int, primary key(H_no, PV_module, Tin_no), constraint fk_Hno foreign key(H_no) references USER(H_no), constraint fk_pv foreign key(PV_module) references PANEL(PV_module), constraint fk_tin foreign key(Tin_no) references VENDOR(Tin_no));
+
+create table PURCHASE(H_no int, PV_module varchar(10), primary key(H_no, PV_module), constraint fkey_HNO foreign key(H_no) references USER(H_no), constraint fkey_PV foreign key(PV_module) references PANEL(PV_module));
+
