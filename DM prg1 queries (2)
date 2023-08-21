@@ -1,0 +1,11 @@
+select e.fname, e.lname, d.Dname from EMPLOYEE e, DEPARTMENT d where e.DNO=d.DNO and e.salary > (select avg(ee.salary) from EMPLOYEE ee, DEPARTMENT dd where ee.DNO=dd.DNO and dd.Dname='Finance');
+
+select e.fname, d.Dname from EMPLOYEE e, DEPARTMENT d, WORKS_ON w where e.DNO=d.DNO and e.SSN=w.SSN and w.PNO in (select PNO from PROJECT where DNO=(select DNO from DEPARTMENT where Dname="R&D")) group by e.SSN having count(w.PNO)>2;
+
+select d.Dname, p.* from DEPARTMENT d, PROJECT p where d.DNO= p.DNO and p.enddate> CURRENT_DATE;
+
+select distinct e.fname, d.Dname from EMPLOYEE e, DEPARTMENT d where e.DNO=d.DNO and e.SSN in (select SupSSN from EMPLOYEE where SSN in (select SSN from WORKS_ON group by SSN having count(PNO) >=1) group by SupSSN having count(SupSSN)>2);
+
+select e.fname from EMPLOYEE e, DEPENDENT d, WORKS_ON w, PROJECT p where e.SSN=d.SSN and e.SSN=w.SSN and w.PNO=p.PNO group by e.SSN having sum(p.budget)>=100000;
+
+select d.Dname, e.* from EMPLOYEE e, DEPARTMENT d where e.DNO=d.DNO and d.DNO in (select DNO from PROJECT where PNO in (select PNO from PROJ_LOC group by PNO having count(PNO)>1));
