@@ -1,0 +1,186 @@
+Based on the provided information, we can design a MongoDB database for the Music Database scenario. MongoDB is a NoSQL database that is well-suited for handling hierarchical and unstructured data like this. In MongoDB, data is organized into collections, and each collection contains documents. Here's how you can design the structure of your MongoDB database:
+
+**COLLECTIONS:**
+
+1. **Musicians Collection:**
+   - Document Structure:
+     ```json
+     {
+       "_id": 1,
+       "SSN": "123-45-6789",
+       "name": "John Doe",
+       "address": "123 Main St",
+       "phone": "555-555-5555",
+       "instruments": [
+         {
+           "instrument_id": 101,
+           "name": "guitar",
+           "musical_key": "C"
+         },
+         {
+           "instrument_id": 102,
+           "name": "flute",
+           "musical_key": "B-flat"
+         }
+         // Add more instruments if necessary
+       ]
+     }
+     ```
+   
+2. **Instruments Collection:**
+   - Document Structure:
+     ```json
+     {
+       "_id": 101,
+       "name": "guitar",
+       "musical_key": "C"
+     }
+     // Documents for other instruments
+     ```
+
+3. **Albums Collection:**
+   - Document Structure:
+     ```json
+     {
+       "_id": 201,
+       "title": "Album Title",
+       "copyright_date": "2023-01-01",
+       "format": "CD",
+       "songs": [
+         {
+           "song_id": 301,
+           "title": "Song Title",
+           "author": "Song Author"
+         }
+         // Add more songs if necessary
+       ],
+       "producer_id": 1 // Reference to musician who is the producer
+     }
+     ```
+
+4. **Producers Collection (Musicians who produce albums):**
+   - Document Structure:
+     ```json
+     {
+       "_id": 1,
+       "SSN": "456-78-9012",
+       "name": "Jane Smith",
+       "address": "456 Elm St",
+       "phone": "555-555-5556"
+     }
+     // Other producer documents
+     ```
+
+**Relations Among Collections:**
+
+- Each musician can play multiple instruments, and each instrument can be played by multiple musicians. This is represented by the `"instruments"` array in the Musicians Collection.
+
+- Each album can have multiple songs, and each song can belong to one album. This is represented by the `"songs"` array in the Albums Collection.
+
+- Each album has a producer, which is a reference to a musician who produces the album. This is represented by the `"producer_id"` field in the Albums Collection, which references the `_id` of a musician in the Producers Collection.
+
+Now, let's design queries to address your requirements:
+
+**Query 1: List musician name, title of the song which he has played, the album in which the song has occurred.**
+```javascript
+db.Albums.aggregate([
+  {
+    $unwind: "$songs"
+  },
+  {
+    $lookup: {
+      from: "Musicians",
+      localField: "songs.title",
+      foreignField: "instruments.name",
+      as: "musician"
+    }
+  },
+  {
+    $project: {
+      "musician.name": 1,
+      "songs.title": 1,
+      "title": 1
+    }
+  }
+])
+```
+
+**Query 2: Retrieve the name of Musicians who have not produced any Album.**
+```javascript
+db.Musicians.find({ "_id": { $nin: db.Albums.distinct("producer_id") } }, { "name": 1 })
+```
+
+**Query 3: List the details of songs which are performed by more than 3 musicians.**
+```javascript
+db.Albums.aggregate([
+  {
+    $unwind: "$songs"
+  },
+  {
+    $lookup: {
+      from: "Musicians",
+      localField: "songs.title",
+      foreignField: "instruments.name",
+      as: "musicians"
+    }
+  },
+  {
+    $match: {
+      "musicians": { $size: { $gt: 3 } }
+    }
+  },
+  {
+    $project: {
+      "songs.title": 1,
+      "musicians.name": 1
+    }
+  }
+])
+```
+
+**Query 4: List the different instruments played by the musicians and the average number of musicians who play the instrument.**
+```javascript
+db.Musicians.aggregate([
+  {
+    $unwind: "$instruments"
+  },
+  {
+    $group: {
+      "_id": "$instruments.name",
+      "musicians_count": { $sum: 1 }
+    }
+  },
+  {
+    $group: {
+      "_id": null,
+      "average_musicians_count": { $avg: "$musicians_count" },
+      "instruments": { $push: { "name": "$_id", "musicians_count": "$musicians_count" } }
+    }
+  }
+])
+```
+
+**Query 5: Retrieve album title produced by the producer who plays guitar as well as flute and has produced no. of songs greater than the average songs produced by all producers.**
+```javascript
+var avgSongsProduced = db.Albums.count() / db.Albums.distinct("producer_id").length;
+
+db.Albums.find({
+  "producer_id": {
+    $in: db.Musicians.find({
+      "instruments.name": { $all: ["guitar", "flute"] }
+    }).distinct("_id")
+  },
+  "songs": { $gt: avgSongsProduced }
+}, { "title": 1 })
+```
+
+**Query 6: List the details of musicians who can play all the instruments present.**
+```javascript
+db.Musicians.find({
+  "instruments.name": {
+    $all: db.Instruments.distinct("name")
+  }
+})
+```
+
+These queries should help you retrieve the desired information from your MongoDB database for the Music Database scenario. Please note that you may need to adjust the field names and collection names in the queries to match your actual database setup.
