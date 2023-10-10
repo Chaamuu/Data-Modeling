@@ -1,0 +1,74 @@
+db.movies.find({
+    year: 2014,
+    $expr: {
+        $gte: [{ $size: "$directors" }, 2],
+    },
+}, {
+    title: 1,
+    directors: 1,
+}, )
+
+db.movies.aggregate([{
+        $group: {
+            _id: '$title',
+            count: { $sum: 1 },
+            movies: { $push: '$$ROOT' }
+        },
+    },
+    {
+        $match: {
+            $and: [
+                { "movies.year": 1975 },
+                { "movies.year": 2014 },
+            ],
+        },
+    },
+]);
+
+
+db.movies.aggregate([{
+        $lookup: { from: 'actors', localField: "actors.actor_id", foreignField: '_id', as: 'actors_list' }
+    },
+    {
+        $lookup: { from: 'directors', localField: "directors", foreignField: '_id', as: 'directors_list' }
+    },
+    {
+        $project: { _id: 0, title: 1, actors_list: { name: 1, dob: 1 }, directors_list: { name: 1, dob: 1 } }
+    },
+    { $unwind: '$actors_list' },
+    { $unwind: '$directors_list' },
+    {
+        $match: { $expr: { $eq: ["$actors_list.dob", "$directors_list.dob"] } }
+    }
+]);
+
+
+
+db.movies.aggregate([{
+        $group: {
+            _id: "$company",
+            count: { $sum: 1 },
+        }
+    },
+    {
+        $group: {
+            _id: "$count",
+            data: { $push: "$_id" }
+        }
+    },
+    {
+        $sort: {
+            "_id": -1
+        }
+    },
+    {
+        $limit: 1
+    },
+    {
+
+        $unwind: "$data"
+    },
+    {
+        $replaceRoot: { newRoot: "$data" }
+    }
+]);
